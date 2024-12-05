@@ -12,9 +12,13 @@ namespace samaya
     }
 
 	GamePage::~GamePage(){
-
+		unloadImages();
+		UnloadFont(gameFont);
+		deleteSnake();
 	}
 
+
+	
      
 	void GamePage::loadGame()
 	{
@@ -23,11 +27,8 @@ namespace samaya
 			//loadFont 
 			gameFont = LoadFont("../res/TOONEYNO.TTF");
 			
-			
 			loadImages();
 
-
-			
 			playAreaX = LEFT_MARGIN + GRID_BORDER;
 			playAreaY = TOP_MARGIN + GRID_BORDER;
 			playAreaWidth = GRID_WIDTH;
@@ -36,14 +37,12 @@ namespace samaya
 			maxRow = (GRID_HEIGHT - 2)/CELL_HEIGHT;
 			maxCol = (GRID_WIDTH - 2)/CELL_WIDTH;
 			
-			// Application.debug("playAreaX = "+ playAreaX +" playAreaY = "+ playAreaY+" playAreaWidth = "+ playAreaWidth+" playAreaHeight = "+ playAreaHeight);
 			timerBgX = LEFT_MARGIN;
 			timerBgY = playAreaY - timerBgH - 1 ;
 			
-			// int baseLine = timerBgH -((timerBgH - 17) >> 1);   
 			
 			timerStrX = timerBgX + 9;
-			timerStrY = timerBgY ;//+ baseLine - 2;
+			timerStrY = timerBgY + 9;
 			
 			controlPanelY = playAreaY + playAreaHeight + 2; 
 			upButtonY =  controlPanelY + 4;
@@ -78,10 +77,32 @@ namespace samaya
 		}
 	}
 
+	void GamePage::unloadImages(){
+		UnloadTexture(timeBg);
+		UnloadTexture(bgImg);
+		UnloadTexture(overlay);
+		UnloadTexture(about);	
+        UnloadTexture(upArrow);
+		UnloadTexture(downArrow);
+		UnloadTexture(leftArrow);
+		UnloadTexture(rightArrow);	
+        UnloadTexture(yellowRound);
+		UnloadTexture(greenRound);
+        UnloadTexture(headDown);
+		UnloadTexture(headLeft);
+		UnloadTexture(headRight);
+		UnloadTexture(headUp);
+
+        UnloadTexture(mouseImg);
+    	UnloadTexture(resumeButton);
+		UnloadTexture(pauseButton);
+		UnloadTexture(newButton);
+        UnloadTexture(reverseDesl);
+		UnloadTexture(reverseSel);
+	}
 
     
-	void GamePage::loadImages()
-	{
+	void GamePage::loadImages()	{
 
 		 about = LoadTexture("../res/about.png");
 		 bgImg = LoadTexture("../res/bg.png");
@@ -153,10 +174,9 @@ namespace samaya
         totalMouseCapture = 0;
         totalTime = 0;
         prevTime = 0;
+		deleteSnake();
         createSnake();
-        generateMouse();
-		
-//        startTime();
+        generateMouse();		
         state = STATE_STARTED;
     }
 
@@ -182,6 +202,19 @@ namespace samaya
         head->setMaxRowCol(maxRow, maxCol);
     
     }
+
+
+	void GamePage::deleteSnake()
+	{
+		SnakePart* parse = head;
+		while(parse != nullptr)
+		{
+			SnakePart* next = parse->next;
+			delete parse;
+			parse = next;
+		}
+		head = nullptr;
+	}
 
 
     void GamePage::generateMouse()
@@ -234,10 +267,7 @@ namespace samaya
 			}            
 		}
 		while(!found);
-		
-		//Application.debug(" MRow "+ row + " MCol "+ col);
 
-		
 		mouse.clear();
 		mouse.push_back(row);
 		mouse.push_back(col);
@@ -247,7 +277,7 @@ namespace samaya
 		
 				if(head->checkTailBite())
 				{
-				state = STATE_GAMEOVER;
+					state = STATE_GAMEOVER;
 				}
 				else if(mouse.size() > 0)
 				{
@@ -275,7 +305,8 @@ namespace samaya
 			DrawTexture(mouseImg ,timerBgX + timerBgW , timerBgY,WHITE);
 
             std::string tmc = std::to_string(totalMouseCapture);
-            DrawText(tmc.c_str(), timerBgX + timerBgW + CELL_WIDTH, timerBgY + 2, 20, WHITE);
+			Vector2 tmcp = {timerBgX + timerBgW + CELL_WIDTH, timerBgY + 6};
+            DrawTextEx(gameFont, tmc.c_str(), tmcp, 20, 0, WHITE);
 			
 			if(state == STATE_GAMEOVER)
 			{
@@ -289,19 +320,18 @@ namespace samaya
 				
 				int strX = (width - strW)>>1;
 	            int strY = (height - strH)>>1;	
-                DrawText(gameOverStr.c_str(),strX  ,strY, 20, WHITE);
+				Vector2 pos ={strX, strY};
+				DrawTextEx(gameFont, gameOverStr.c_str(),pos  , 20,0, WHITE);
 
-				if(gONewButtonX == 0)
-				{
-					gONewButtonX = (width - npButtonW)>>1;
-					gONewButtonY = (strY + strH);
-				}
-				
-				
+	
+				gONewButtonX = (width - npButtonW)>>1;
+				gONewButtonY = (strY + strH);
+			
 				DrawTexture(newButton, gONewButtonX, gONewButtonY, WHITE);
 			}
 			else if(state == STATE_PAUSED)
 			{
+				drawOverlay();
                 Vector2 m = MeasureTextEx(gameFont, pausedStr.c_str(), 20.0f,0);
 				int strW = m.x;
 				int strH = m.y;
@@ -343,7 +373,7 @@ namespace samaya
 		char time[9];
 		sprintf(time, "%02d:%02d:%02d", hours, minutes, seconds);
 		Vector2 pos = {timerStrX, timerStrY};
-		DrawTextEx(gameFont, time, pos, 20, 0, WHITE);
+		DrawTextEx(gameFont, time, pos, 15, 0, WHITE);
 		
 	}
 
@@ -423,7 +453,7 @@ namespace samaya
 		{
 			for(int j = 0; j < width; j+=overlayW)
 			{
-				DrawTexture(overlay, j, i, WHITE);
+				DrawTexture(overlay, j, i, GRAY);
 			}
 		}
 	}
@@ -582,31 +612,7 @@ namespace samaya
 		return handled;
 	}
 
-
-// string getTimeAsString(long time)
-//     {
-//         strbuf.setLength(0);
-//         long hrs = time/HRS_IN_MILLIS;
-//         long min = (time %HRS_IN_MILLIS)/MIN_IN_MILLIS;
-//         long sec = ((time %HRS_IN_MILLIS)%MIN_IN_MILLIS)/1000;
-//         //strbuf.append(hrs);
-//         //strbuf.append(":");
-//         if(min < 10)
-//         {
-//         	strbuf.append("0");
-//         }
-//         strbuf.append(min);
-//         strbuf.append(" : ");
-//         if(sec < 10)
-//         {
-//         	strbuf.append("0");
-//         }
-
-//         strbuf.append(sec);
-        
-//         return strbuf.toString();
-//     }
-    
+   
 } // namespace samaya
 
 

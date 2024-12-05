@@ -28,8 +28,10 @@ namespace samaya{
             void processInput() override;
             void loadGame();
             void loadImages();
+            void unloadImages();
             void initGame();
             void createSnake();
+            void deleteSnake();
             void generateMouse();
             void checkhit();
             void drawControlPanel();
@@ -65,7 +67,7 @@ namespace samaya{
             int buttonW, buttonH;
             int bgW, bgH;
             int timerBgX, timerBgY,timerBgW, timerBgH; 
-            int timerStrX, timerStrY;
+            float timerStrX, timerStrY;
             
             
             int overlayW, overlayH;
@@ -79,7 +81,7 @@ namespace samaya{
                 
             Task  task_move_snake, time_task;
             
-            SnakePart* head;
+            SnakePart* head = nullptr;
             
             int maxRow,maxCol;
             

@@ -81,8 +81,11 @@ namespace samaya
 
     bool SnakePart::changeDirection(Direction direction) {
       bool handled = false;
-      if (this->part_type == HEAD && ((this->direction == LEFT || this->direction == RIGHT) && direction != LEFT && direction != RIGHT || 
-                                       (this->direction == UP || this->direction == DOWN) && direction != UP && direction != DOWN)) {
+      if (this->part_type == HEAD && this->direction != direction &&  
+      (direction == LEFT && this->direction != RIGHT || 
+       direction == RIGHT && this->direction != LEFT ||
+       direction == UP && this->direction != DOWN ||
+       direction == DOWN && this->direction != UP )){
          SnakePart* tail = this->prev;
 
          for(SnakePart* parse = tail; parse != this; parse = parse->prev) {

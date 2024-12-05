@@ -1,0 +1,21 @@
+{
+    "files.associations": {
+        "*.tpp": "cpp",
+        "xutility": "cpp",
+        "vector": "cpp",
+        "iosfwd": "cpp",
+        "xlocbuf": "cpp",
+        "charconv": "cpp",
+        "format": "cpp",
+        "random": "cpp",
+        "xhash": "cpp",
+        "xlocnum": "cpp",
+        "xmemory": "cpp",
+        "*.tcc": "cpp",
+        "xstring": "cpp"
+    },
+    "C_Cpp.default.includePath": [
+        "${workspaceFolder}/include",
+        "C:/Progs/mingw64/include"
+    ]
+}
